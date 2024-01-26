@@ -52,7 +52,7 @@ function C_ij = calculate_mode_coupling_ij_mixed(n, q, r_o, r_i, d_t, d_z, root_
             term2_2 = root_0q * L_1_n1_ri * J_2_q2_ri * r_i / r_o;
             term2 = term2_1 - term2_2;
             
-            denom = (root_0n * root_0n) / (r_i * r_i) - (root_0q * root0q) / (r_o * r_o);
+            denom = (root_0n * root_0n) / (r_i * r_i) - (root_0q * root_0q) / (r_o * r_o);
         case 2 % eq (2.16)
             L_1_q2_ri = bessel_L(1, q, r_i, r_i, root_0q);   
             L_1_q2_ro = bessel_L(1, q, r_o, r_i, root_0q);     
@@ -60,6 +60,7 @@ function C_ij = calculate_mode_coupling_ij_mixed(n, q, r_o, r_i, d_t, d_z, root_
             prod3 = 1/sqrt( (-r_i^2 * L_1_q2_ri^2 + r_o^2 * L_1_q2_ro^2) * J_1_n1);
             
             L_2_q2_ro = bessel_L(2, q, r_o, r_i, root_0q);
+            J_2_n1 = besselj(2, root_0n);
             term1_1 = root_0q * L_2_q2_ro * J_1_n1 * r_o / r_i;
             term1_2 = root_0n * L_1_q2_ro * J_2_n1; % (*r_o/r_o=1)
             term1 = term1_1 - term1_2;
@@ -72,7 +73,7 @@ function C_ij = calculate_mode_coupling_ij_mixed(n, q, r_o, r_i, d_t, d_z, root_
             term2_2 = root_0n * L_1_q2_ri * J_2_n1_ri * r_i / r_o;
             term2 = term2_1 - term2_2;
             
-            denom = (root_0q * root_0q) / (r_i * r_i) - (root_0n * root0n) / (r_o * r_o);
+            denom = (root_0q * root_0q) / (r_i * r_i) - (root_0n * root_0n) / (r_o * r_o);
         otherwise
             error("case_area can only take values 1 or 2.")
     end

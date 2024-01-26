@@ -12,6 +12,8 @@ function S = scattering_matrix_mixed(freq, radius_inner, radius_outer, length_1,
         number_of_modes
         junction_case % 1 or 2, equivalent to cases discussed in section [2.2]
         options.print_cutoff = false
+        options.propagator_geometry1 = false
+        options.propagator_geometry2 = true
     end
     %% Global parameters
     % Geometry
@@ -25,7 +27,6 @@ function S = scattering_matrix_mixed(freq, radius_inner, radius_outer, length_1,
     mu_0 = 1.25663706212e-6;            % vacuum permeability
     eps_0 = 8.8541878128e-12;           % vacuum permittivity
     k2 = (2*pi*freq)^2 * mu_0 * eps_0;  % wavenumber squared
-    %eta = sqrt(mu_0/eps_0);             % wave impedance (not used atm)
 
     %% Roots, wavenumbers and cutoff
     d_t = zeros(N,2); % transversal wavenumbers; left-side stored in d_t(:,1), right-side in d_t(:,2)
@@ -43,11 +44,9 @@ function S = scattering_matrix_mixed(freq, radius_inner, radius_outer, length_1,
         otherwise
             error("Parameter junction_case must take value 1 or 2.")
     end
-    
-    % todo: determine which side has circular waveguide and coaxial. 
-    % update code below this point
-    
-    d_z = sqrt(k2 - d_t.^2);  % longitudinal wavenumbers; left-side stored in d_z(:,1), right-side in d_z(:,2)
+        
+    % longitudinal wavenumbers; left-side stored in d_z(:,1), right-side in d_z(:,2)
+    d_z = sqrt(k2 - d_t.^2);  
 
     % if 1st mode in either geometry is below cutoff, set S=0 and exit.
     if ~above_cutoff(1, d_z, 1) || ~above_cutoff(1, d_z, 2)
@@ -65,7 +64,7 @@ function S = scattering_matrix_mixed(freq, radius_inner, radius_outer, length_1,
     end
     
     %% 1st Propagator
-    % Wave propagation from port 1 (z=0) to junction (z=h_1)
+    % Wave propagation from z=-length_1 to junction z=0
     zero_matrix = zeros(N,N);
     if options.propagator_geometry1
         P_1 = compile_propagator_matrix(N, 0, h_1, d_z, 1);
@@ -100,25 +99,27 @@ function S = scattering_matrix_mixed(freq, radius_inner, radius_outer, length_1,
     end
 
     % Scattering matrix
-    S_junction = compile_scattering_matrix(D_1, D_2, C); % Calculating this with P-matrix to get S_L for the next junction(correct?)
+    S_junction = compile_scattering_matrix(D_1, D_2, C);
 
     %% 2nd Propagator
-    % Wave propagation from junction (z=h_1) to port 2 (z=h_1+h_2)
-    P_2 = compile_propagator_matrix(N, h_1, h_1+h_2, d_z, 2);
-    P_2_macro = [zero_matrix P_2; P_2 zero_matrix];
-
+    % Wave propagation from junction (z=0) to end of geometry 2 (z=length_2)
+    if options.propagator_geometry2
+        P_2 = compile_propagator_matrix(N, h_1, h_1+h_2, d_z, 2);
+        P_2_macro = [zero_matrix P_2; P_2 zero_matrix];
+    end
     %% Total S-matrix
+    S = S_junction;
     if options.propagator_geometry1
-        S =  P_1_macro * S_junction * P_2_macro;
-    else
-        S = S_junction * P_2_macro;
+        S =  P_1_macro * S;
+    elseif options.propagator_geometry2
+        S = S * P_2_macro;      
     end
 
     if ~check_physical_realizability(S) 
         % If operating frequency < cutoff frequency then ignore,
         % otherwise print warning.
-        % Start from highest mode; 
-        % if freq>cutoff_highermode then also freq>cutoff_lowermode
+        % Start from highest mode 
+        % (if freq>cutoff_highermode then also freq>cutoff_lowermode)
         for n=(N:-1:1)
             f_c_1 = calculate_cutoff(n, d_t, 1); % cutoff freq of mode n, for left-side geometry
             f_c_2 = calculate_cutoff(n, d_t, 2); % cutoff freq of mode n, for right-side geometry

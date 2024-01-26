@@ -15,6 +15,7 @@ function S = scattering_matrix_coaxials(freq, radius_inner, radius_outer_1, radi
         number_of_modes
         options.print_cutoff = false
         options.propagator_geometry1 = false
+        options.propagator_geometry2 = true
     end
     %% Global parameters
     % Geometry
@@ -28,8 +29,7 @@ function S = scattering_matrix_coaxials(freq, radius_inner, radius_outer_1, radi
     mu_0 = 1.25663706212e-6;            % vacuum permeability
     eps_0 = 8.8541878128e-12;           % vacuum permittivity
     k2 = (2*pi*freq)^2 * mu_0 * eps_0;  % wavenumber squared
-    %eta = sqrt(mu_0/eps_0);             % wave impedance (not used atm)
-
+    
     %% Roots, wavenumbers and cutoff
     root_0n = bessel_L_root(0, N, r_o(1), r_i); % geometry 1
     root_0q = bessel_L_root(0, N, r_o(2), r_i); % geometry 2
@@ -47,12 +47,6 @@ function S = scattering_matrix_coaxials(freq, radius_inner, radius_outer_1, radi
         return
     end
     
-%     for n=1:N
-%         if ~above_cutoff(n, d_z, 1) || ~above_cutoff(n, d_z, 2)
-%             S = zeros(2*N, 2*N);
-%             return
-%         end
-%     end
     if options.print_cutoff
         for n=1:N % badly optimized for frequency sweeps; does not change wrt freq but prints for every freq iteration.
             f_c_1 = calculate_cutoff(n, d_t, 1); % cutoff freq for left-side geometry
@@ -110,25 +104,27 @@ function S = scattering_matrix_coaxials(freq, radius_inner, radius_outer_1, radi
     end
 
     % Scattering matrix
-    S_junction = compile_scattering_matrix(D_1, D_2, C); % Calculating this with P-matrix to get S_L for the next junction(correct?)
+    S_junction = compile_scattering_matrix(D_1, D_2, C); 
 
     %% 2nd Propagator
     % Wave propagation from junction (z=h_1) to (z=h_1+h_2)
-    P_2 = compile_propagator_matrix(N, h_1, h_1+h_2, d_z, 2);
-    P_2_macro = [zero_matrix P_2; P_2 zero_matrix];
-
+    if options.propagator_geometry2
+        P_2 = compile_propagator_matrix(N, h_1, h_1+h_2, d_z, 2);
+        P_2_macro = [zero_matrix P_2; P_2 zero_matrix];
+    end
     %% Total S-matrix
+    S = S_junction;
     if options.propagator_geometry1
-        S =  P_1_macro * S_junction * P_2_macro;
-    else
-        S = S_junction * P_2_macro;
+        S =  P_1_macro * S;
+    elseif options.propagator_geometry2
+        S = S * P_2_macro;      
     end
 
     if ~check_physical_realizability(S, print_warning=false) 
         % If operating frequency < cutoff frequency then ignore,
         % otherwise print warning.
-        % Start from highest mode; 
-        % if freq>cutoff_highermode then also freq>cutoff_lowermode
+        % Start from highest mode 
+        % (if freq>cutoff_highermode then also freq>cutoff_lowermode)
         for n=(N:-1:1)
             f_c_1 = calculate_cutoff(n, d_t, 1); % cutoff freq of mode n, for left-side geometry
             f_c_2 = calculate_cutoff(n, d_t, 2); % cutoff freq of mode n, for right-side geometry
