@@ -5,6 +5,7 @@ Electromagnetic waves are assumed to travel from left to right inside a waveguid
 
 The main functions used to compile such a waveguide are _scattering_matrix_coaxials()_ and _scattering_matrix_mixed()_. These functions are described below, while details on the physics can be found in the attached PDF report, specifically chapter 2. See the simple example scripts _example_coaxial_fsweep.m_ and _example_hw3_waveguide.m_ for basic usage of the code. More details on code usage can be found in Chapter 5 of the PDF report, including explanations of the two example scripts.
 
+### Main functions
 The function _scattering_matrix_coaxials()_ calculates the scattering matrix between a junction of two coaxials with shared inner conductor but different outer wall radii, see Chapter 2.1 in PDF. Input parameters are
 - Operating frequency of the electromagnetic wave.
 - Radius of both coaxials' inner conductor. NOTE: Two connecting coaxials are assumed to share the same inner conductor.
