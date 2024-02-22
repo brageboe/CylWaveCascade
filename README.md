@@ -1,9 +1,11 @@
 # WaveCascade
 Exact calculations of cylindrical waveguides and coaxial waveguides connected in series.
 
-Electromagnetic waves are assumed to travel from left to right inside a waveguide. The waveguide may consist of several sections, and each section is either a circular (cylindrical) waveguide or a circular (cylindrical) coaxial waveguide. The main functions used to compile such a waveguide are scattering_matrix_coaxials() and scattering_matrix_mixed(). These functions are described below, while details on the physics can be found in the attached PDF report, specifically chapter 2. See the simple example scripts for basic usage of the code.
+Electromagnetic waves are assumed to travel from left to right inside a waveguide. The waveguide may consist of several sections, and each section is either a circular (cylindrical) waveguide or a circular (cylindrical) coaxial waveguide. 
 
-The function scattering_matrix_coaxials() calculates the scattering matrix between a junction of two coaxials with shared inner conductor but different outer wall radii, see Chapter 2.1 in PDF. Input parameters are
+The main functions used to compile such a waveguide are _scattering_matrix_coaxials()_ and _scattering_matrix_mixed()_. These functions are described below, while details on the physics can be found in the attached PDF report, specifically chapter 2. See the simple example scripts _example_coaxial_fsweep.m_ and _example_hw3_waveguide.m_ for basic usage of the code. More details on code usage can be found in Chapter 5 of the PDF report, including explanations of the two example scripts.
+
+The function _scattering_matrix_coaxials()_ calculates the scattering matrix between a junction of two coaxials with shared inner conductor but different outer wall radii, see Chapter 2.1 in PDF. Input parameters are
 - Operating frequency of the electromagnetic wave.
 - Radius of both coaxials' inner conductor. NOTE: Two connecting coaxials are assumed to share the same inner conductor.
 - Radius of the outer walls of the first coaxial.
@@ -13,7 +15,7 @@ The function scattering_matrix_coaxials() calculates the scattering matrix betwe
 - Number of modes to include in the calculation.
 - Optional input parameters include (i) printing the cut-off frequencies for each waveguide segment (ii) whether to include propagation in first and/or second segment.
 
-The function scattering_matrix_mixed() calculates the scattering matrix between a junction of a coaxial and a circular waveguide with shared outer radii, see Chapter 2.3 in PDF. Input parameters are
+The function _scattering_matrix_mixed()_ calculates the scattering matrix between a junction of a coaxial and a circular waveguide with shared outer radii, see Chapter 2.3 in PDF. Input parameters are
 - Operating frequency of the electromagnetic wave.
 - Radius of coaxial's inner conductor. 
 - Radius of the outer walls of both waveguides. NOTE: Two connecting waveguides of mixed type are assumed to share the same outer wall radius.
